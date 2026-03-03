@@ -32,6 +32,16 @@ Eine moderne, webbasierte Habit-Tracking-Anwendung mit React und TypeScript. Ver
 
 ## 🚀 Schnellstart
 
+### 📱 Zugriff vom Handy
+Damit der Entwicklungs‑Server auch von anderen Geräten im selben WLAN erreichbar ist, wurde `vite.config.ts` so konfiguriert, dass der Server auf allen Interfaces lauscht (`host: true`).
+
+- Starten Sie den Server wie gewohnt mit `npm run dev`.
+- Ermitteln Sie die lokale IP-Adresse Ihres Rechners (z.B. `192.168.1.42`).
+- Öffnen Sie im Browser Ihres Handys `http://<IP-Adresse>:5173`.
+
+> **Hinweis:** Je nach Betriebssystem/Firewall kann es notwendig sein, den Port 5173 freizugeben.
+
+
 ### Voraussetzungen
 - Node.js (v24+) installiert auf E:\ (oder anpassen Sie den Pfad)
 - npm (kommt mit Node.js)
@@ -104,7 +114,35 @@ habit-tracker/
 └── index.html              # HTML-Template
 ```
 
-## 🛠️ Tech-Stack
+## � Deployment
+
+Für einen dauerhaft erreichbaren Server kannst du das Projekt auf einer Hosting‑Plattform wie **Render.com** deployen. Da das Ergebnis ein statisches React‑Frontend ist, eignet sich der kostenlose "Static Site"‑Service hervorragend.
+
+1. Repository auf GitHub (oder GitLab/Bitbucket) pushen. Render benötigt einen Git‑zugang.
+2. Melde dich bei [Render](https://render.com) an und erstelle ein neues **Static Site**‑Service.
+   - Wähle das richtige Git-Repo aus.
+   - Als **Build Command** verwende `npm install && npm run build`.
+   - Als **Publish Directory** gib `dist` an.
+   - (Optional) Lege einen `NODE_VERSION`‑Umgebungs­variable fest, z.B. `18`.
+3. Alternativ kannst du eine `render.yaml` im Projekt anlegen (siehe unten); Render synchronisiert dann automatisch Konfigurationen.
+4. Sobald der Build durchgelaufen ist, stellt Render die Seite unter einer render.com‑URL zur Verfügung, die du ebenfalls auf deinem Handy öffnen kannst.
+
+Die enthaltene `render.yaml` sieht folgendermaßen aus:
+
+```yaml
+services:
+  - type: static
+    name: habit-tracker
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    publishPath: dist
+```
+
+> 💡 Nach der ersten Bereitstellung werden alle Pushes ins Haupt‑Branch automatisch neue Versionen ausrollen.
+
+
+## �🛠️ Tech-Stack
 
 | Technologie | Version | Zweck |
 |------------|---------|-------|

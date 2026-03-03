@@ -11,6 +11,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,            // allow access from other devices on the network (e.g. phone)
     port: 5173,
     open: true,
   },

@@ -1,0 +1,16 @@
+# render.yaml - Render deployment configuration for the Habit Tracker project
+# When you push this repository to GitHub and connect it to Render,
+# the service will be automatically created/updated according to this file.
+
+services:
+  - type: static
+    name: habit-tracker
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    # optional: specify a node version if you want
+    # build:
+    #   envVars:
+    #     - key: NODE_VERSION
+    #       value: "18"
