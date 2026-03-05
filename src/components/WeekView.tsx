@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, startOfWeek, addDays, addWeeks, subWeeks } from 'date-fns';
+import { format, startOfWeek, addDays, addWeeks } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Habit } from '../types';
