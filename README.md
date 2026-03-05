@@ -1,222 +1,101 @@
-# 🎯 Habit Tracker
+# Habit Tracker
 
-Eine moderne, webbasierte Habit-Tracking-Anwendung mit React und TypeScript. Verfolgen Sie Ihre täglichen Gewohnheiten, visualisieren Sie Ihre Fortschritte und erkennen Sie Ihre Streaks!
+Eine webbasierte Habit-Tracking-App mit React, TypeScript und Supabase.
 
-## 📋 Features
-
-### Kern-Funktionalitäten
-
-- **Habit Management**: Erstellen, bearbeiten und löschen Sie Habits mit Namen, Beschreibungen, Kategorien und Farben
-- **Flexible Häufigkeiten**: Unterstützt täglich, wöchentlich und monatlich wiederkehrende Habits
-- **Tracking mit Timestamps**: Markieren Sie erledigte Habits und verfolgen Sie sie zeitgenau
-- **Streak-Berechnung**: Automatische Berechnung von aktuellen und längsten Serien
-
-### Ansichten
-
-| Ansicht | Beschreibung |
-|---------|-------------|
-| **Tagesansicht** | Alle täglichen Habits für heute mit Live-Fortschrittsanzeige |
-| **Wochenansicht** | 7-Tage Kalender mit Checkboxes für schnelle Übersicht |
-| **Monatsansicht** | Heatmap ähnlich GitHub Contributions mit Farbcodierung |
-| **Listensicht** | Alle Habits mit Suche, Filterung nach Kategorie und Streaks |
-| **Statistiken** | Diagramme, Erfolgsquoten und Top-Serien |
-
-### Zusatzfeatures
-
-✨ **Dark Mode** - Umschalter für Nachtsichtmodus  
-💾 **Export/Import** - Daten als JSON speichern und wiederherstellen  
-🔍 **Suche** - Schnelle Habitsuche  
-🏷️ **Kategorien** - Organisieren Sie Habits logisch  
-📱 **Responsive Design** - Funktioniert auf Desktop, Tablet und Handy  
-⚡ **Hot-Reload** - Live-Updates während der Entwicklung  
-
-## 🚀 Schnellstart
-
-### 📱 Zugriff vom Handy
-Damit der Entwicklungs‑Server auch von anderen Geräten im selben WLAN erreichbar ist, wurde `vite.config.ts` so konfiguriert, dass der Server auf allen Interfaces lauscht (`host: true`).
-
-- Starten Sie den Server wie gewohnt mit `npm run dev`.
-- Ermitteln Sie die lokale IP-Adresse Ihres Rechners (z.B. `192.168.1.42`).
-- Öffnen Sie im Browser Ihres Handys `http://<IP-Adresse>:5173`.
-
-> **Hinweis:** Je nach Betriebssystem/Firewall kann es notwendig sein, den Port 5173 freizugeben.
-
-
-### Voraussetzungen
-- Node.js (v24+) installiert auf E:\ (oder anpassen Sie den Pfad)
-- npm (kommt mit Node.js)
-
-### Installation & Start (einfachste Methode)
-
-**Option 1: Batch-Datei erstellen und ausführen**
-
-1. Erstelle eine Datei `start-habit-tracker.cmd` im Projektverzeichnis mit folgendem Inhalt:
-```batch
-@echo off
-cd /d "c:\Users\benib\Documents\Programmieren\Vibe_coding\Bucketlist_with_CoPilot\habit-tracker"
-set PATH=E:;%PATH%
-E:\npm.cmd run dev
-pause
-```
-
-2. Doppelklick auf `start-habit-tracker.cmd`
-3. Browser öffnet sich automatisch auf **http://localhost:5173/**
-
-**Option 2: Manuell via PowerShell**
-
-```powershell
-cd "c:\Users\benib\Documents\Programmieren\Vibe_coding\Bucketlist_with_CoPilot\habit-tracker"
-$env:PATH = "E:;" + $env:PATH
-E:\npm.cmd run dev
-```
-
-Dann öffne: **http://localhost:5173/**
-
-### Verfügbare NPM-Befehle
-
-```bash
-# Entwicklungs-Server starten (mit Hot-Reload)
-E:\npm.cmd run dev
-
-# Production-Build erstellen
-E:\npm.cmd run build
-
-# Gebaut App testen
-E:\npm.cmd run preview
-
-# Dependencies installieren (nur einmalig nötig)
-E:\npm.cmd install
-```
-
-## 📁 Projektstruktur
-
-```
-habit-tracker/
-├── src/
-│   ├── components/          # React-Komponenten
-│   │   ├── DayView/        # Tagesansicht
-│   │   ├── WeekView/       # Wochenansicht
-│   │   ├── MonthView/      # Monatsansicht
-│   │   ├── HabitForm/      # Habit-Erstellung/-Bearbeitung
-│   │   ├── HabitCard/      # Habit-Element
-│   │   ├── HabitList/      # Listensicht
-│   │   └── Statistics/     # Statistiken- & Chart-Komponenten
-│   ├── store/              # Zustand Store (habitStore.ts)
-│   ├── types/              # TypeScript Interfaces
-│   ├── utils/              # Utility-Funktionen (dateHelpers.ts)
-│   ├── App.tsx             # Hauptkomponente
-│   ├── main.tsx            # Einstiegspunkt
-│   └── index.css           # Globale Styles
-├── package.json            # Dependencies & Scripts
-├── tsconfig.json           # TypeScript Konfiguration
-├── vite.config.ts          # Vite Konfiguration
-├── tailwind.config.js      # Tailwind CSS Konfiguration
-└── index.html              # HTML-Template
-```
-
-## � Deployment
-
-Für einen dauerhaft erreichbaren Server kannst du das Projekt auf einer Hosting‑Plattform wie **Render.com** deployen. Da das Ergebnis ein statisches React‑Frontend ist, eignet sich der kostenlose "Static Site"‑Service hervorragend.
-
-1. Repository auf GitHub (oder GitLab/Bitbucket) pushen. Render benötigt einen Git‑zugang.
-2. Melde dich bei [Render](https://render.com) an und erstelle ein neues **Static Site**‑Service.
-   - Wähle das richtige Git-Repo aus.
-   - Als **Build Command** verwende `npm install && npm run build`.
-   - Als **Publish Directory** gib `dist` an.
-   - (Optional) Lege einen `NODE_VERSION`‑Umgebungs­variable fest, z.B. `18`.
-3. Alternativ kannst du eine `render.yaml` im Projekt anlegen (siehe unten); Render synchronisiert dann automatisch Konfigurationen.
-4. Sobald der Build durchgelaufen ist, stellt Render die Seite unter einer render.com‑URL zur Verfügung, die du ebenfalls auf deinem Handy öffnen kannst.
-
-Die enthaltene `render.yaml` sieht folgendermaßen aus:
-
-```yaml
-services:
-  - type: static
-    name: habit-tracker
-    env: node
-    plan: free
-    buildCommand: npm install && npm run build
-    publishPath: dist
-```
-
-> 💡 Nach der ersten Bereitstellung werden alle Pushes ins Haupt‑Branch automatisch neue Versionen ausrollen.
-
-
-## �🛠️ Tech-Stack
-
-| Technologie | Version | Zweck |
-|------------|---------|-------|
-| **React** | 18.2 | UI-Bibliothek |
-| **TypeScript** | 5.2 | Typsicherheit |
-| **Tailwind CSS** | 3.3 | Styling |
-| **Zustand** | 4.4 | State Management |
-| **Recharts** | 2.10 | Datenvisualisierung |
-| **date-fns** | 3.0 | Datumsverwaltung |
-| **Vite** | 5.4 | Build Tool & Dev Server |
-| **lucide-react** | Latest | Icons |
-
-## 📊 Datenstruktur
-
-### Habit
-```typescript
-interface Habit {
-  id: string;
-  name: string;
-  description?: string;
-  category?: string;
-  color: string;
-  frequency: 'daily' | 'weekly' | 'monthly';
-  createdAt: string;
-  archived: boolean;
-}
-```
-
-### HabitCompletion
-```typescript
-interface HabitCompletion {
-  habitId: string;
-  date: string; // ISO format YYYY-MM-DD
-  completed: boolean;
-  timestamp: string;
-}
-```
-
-Alle Daten werden in **LocalStorage** gespeichert - keine Internetverbindung erforderlich!
-
-## 💡 Tipps zur effizienten Nutzung
-
-1. **Gewohnheiten kategorisieren**: Nutzen Sie Kategorien (Gesundheit, Fitness, Lernen, etc.)
-2. **Farbcodes nutzen**: Zuweisen Sie verschiedenen Habits unterschiedliche Farben für schnelle Erkennung
-3. **Wöchentliche Reviews**: Schauen Sie sich die Statistiken an, um Muster zu erkennen
-4. **Streaks verfolgen**: Die Serien-Anzeige motiviert, Gewohnheiten durchzuhalten
-5. **Export regelmäßig**: Sichern Sie Ihre Daten gelegentlich mit Export
-
-## 🔒 Datenschutz
-
-- ✅ Keine externen Server - alles läuft lokal
-- ✅ Alle Daten im Browser gespeichert (LocalStorage)
-- ✅ Kein Tracking oder Telemetrie
-- ✅ Export/Import für volle Kontrolle Ihrer Daten
-
-## 🐛 Bekannte Einschränkungen
-
-- Daten werden pro Browser/Gerät gespeichert
-- Browser-Cache löschen löscht auch alle Daten (Export vorher!)
-- Mobile Ansicht noch nicht vollständig optimiert
-
-## 🚀 Zukünftige Features (geplant)
-
-- [ ] Cloud-Synchronisation
-- [ ] Multi-Device Sync
-- [ ] Habit-Templates
-- [ ] Benachrichtigungen
-- [ ] Kolaborative Habits
-- [ ] Erweiterte Statistiken
-
-## 📝 Lizenz
-
-Persönliches Projekt - frei nutzbar für private Zwecke.
+**Live:** https://habit-tracker-ten-psi-73.vercel.app/
 
 ---
 
-**Viel Erfolg beim Tracking Ihrer Gewohnheiten! 🎯**
+## Setup
+
+```
+Browser
+   ↕
+Vercel  (Frontend-Hosting, kostenlos)
+   ↕
+Supabase  (Datenbank, kostenlos)
+```
+
+- **Vercel** hostet die App 24/7 unter der obigen URL
+- **Supabase** speichert alle Habits und Completions dauerhaft
+- **GitHub** (`BenUni28/habit-tracker`) ist die Verbindung zwischen beiden – jeder Push auf `main` löst ein automatisches Deployment aus
+
+---
+
+## Features
+
+**4 Ansichten:**
+- **Heute** – Habits abhaken, Fortschrittsbalken, Streak-Anzeige
+- **Woche** – 7-Tage-Grid, vergangene Tage können interaktiv getoggled werden
+- **Monat** – Kalender mit farbigen Dots pro abgeschlossenem Habit
+- **Statistik** – Summary-Karten, Completion-Rate-Chart, Heatmap (12 Wochen), Streak-Tabelle
+
+**Habit-Verwaltung:**
+- Name, Beschreibung, Kategorie (optional)
+- Häufigkeit: täglich / wöchentlich / monatlich
+- Farbauswahl
+- Bearbeiten & Löschen
+
+---
+
+## Lokale Entwicklung
+
+```bash
+npm install
+npm run dev
+```
+
+Die App läuft dann auf `http://localhost:5173`.
+Im gleichen WLAN ist sie auch über die Netzwerk-IP erreichbar (wird im Terminal angezeigt).
+
+**Änderungen deployen:**
+```bash
+git add -A
+git commit -m "Beschreibung der Änderung"
+git push
+```
+Vercel baut und deployed automatisch – fertig.
+
+---
+
+## Datenbank (Supabase)
+
+Zwei Tabellen:
+
+```sql
+habits (
+  id UUID PRIMARY KEY,
+  name TEXT,
+  color TEXT,
+  description TEXT,
+  category TEXT,
+  frequency TEXT,  -- 'daily' | 'weekly' | 'monthly'
+  archived BOOLEAN,
+  created_at TIMESTAMPTZ
+)
+
+habit_completions (
+  id BIGSERIAL PRIMARY KEY,
+  habit_id UUID REFERENCES habits(id),
+  date DATE,
+  UNIQUE(habit_id, date)
+)
+```
+
+Die SQL-Setup-Dateien liegen im Projektordner:
+- `SUPABASE_SETUP_NEU.sql` – einmalig ausführen für frische Installation
+- `SUPABASE_MIGRATION.sql` – neue Spalten zu bestehender DB hinzufügen
+
+---
+
+## Tech-Stack
+
+| | |
+|---|---|
+| React 18 + TypeScript | UI |
+| Tailwind CSS | Styling |
+| Supabase | Datenbank |
+| Recharts | Charts |
+| date-fns | Datumsverwaltung |
+| Vite | Build Tool |
+| Vercel | Hosting |

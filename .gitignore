@@ -30,3 +30,4 @@ dist-ssr
 
 # Habit Tracker specific
 export_*.json
+*.tsbuildinfo
