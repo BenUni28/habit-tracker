@@ -9,17 +9,17 @@ echo   ║     🎯 Habit Tracker Launcher      ║
 echo   ╚════════════════════════════════════╝
 echo.
 
-cd /d "c:\Users\benib\Documents\Programmieren\Vibe_coding\Bucketlist_with_CoPilot\habit-tracker"
+cd /d "%~dp0"
 
 if not exist node_modules (
     echo [INFO] Installiere Dependencies...
-    set PATH=E:;%PATH%
-    E:\npm.cmd install
+    call npm install
     echo.
 )
 
 echo [INFO] Starte Entwicklungs-Server...
-set PATH=E:;%PATH%
-E:\npm.cmd run dev
+echo [INFO] Oeffnet sich automatisch im Browser auf http://localhost:5173
+echo.
+call npm run dev
 
 pause
