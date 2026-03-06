@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { CheckCircle2, CalendarDays, Calendar, BarChart2, Plus, AlertCircle } from 'lucide-react';
+import { CheckCircle2, CalendarDays, Calendar, BarChart2, Plus, AlertCircle, LogOut, User } from 'lucide-react';
+import { useAuth } from './hooks/useAuth';
 import { useHabits } from './hooks/useHabits';
 import { Habit, View } from './types';
-import { HabitItem } from './components/HabitItem';
+import { LoginPage } from './components/LoginPage';
+import { HabitCard } from './components/HabitCard';
 import { HabitModal, HabitFormData } from './components/HabitModal';
 import { WeekView } from './components/WeekView';
 import { MonthView } from './components/MonthView';
@@ -18,27 +20,17 @@ const NAV: { id: View; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function App() {
+  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const [view, setView] = useState<View>('today');
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   const {
-    habits,
-    completions,
-    loading,
-    error,
-    today,
-    isCompleted,
-    isCompletedForPeriod,
-    toggleCompletion,
-    addHabit,
-    editHabit,
-    deleteHabit,
-    getStreak,
-    getBestStreak,
-    getCompletionRate,
-    getHeatmapData,
-  } = useHabits();
+    habits, completions, loading, error, today,
+    isCompleted, isCompletedForPeriod, toggleCompletion,
+    addHabit, editHabit, deleteHabit,
+    getStreak, getBestStreak, getCompletionRate, getHeatmapData,
+  } = useHabits(user?.id ?? null);
 
   const completedToday = habits.filter((h) => isCompletedForPeriod(h)).length;
   const progress = habits.length > 0 ? completedToday / habits.length : 0;
@@ -53,6 +45,21 @@ export default function App() {
     setEditingHabit(null);
   };
 
+  // Ladescreen (Auth-Check)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Login-Seite wenn nicht angemeldet
+  if (!user) {
+    return <LoginPage onSignIn={signInWithGoogle} />;
+  }
+
+  // Habits laden
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -66,13 +73,43 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
-      <div className="max-w-lg mx-auto px-4 pb-28">
+      <div className="max-w-5xl mx-auto px-4 pb-28">
+
         {/* Header */}
-        <div className="pt-12 pb-6">
-          <p className="text-slate-500 text-sm capitalize">
-            {format(new Date(), 'EEEE, d. MMMM yyyy', { locale: de })}
-          </p>
-          <h1 className="text-3xl font-bold text-slate-100 mt-1">Habit Tracker</h1>
+        <div className="pt-10 pb-6 flex items-start justify-between">
+          <div>
+            <p className="text-slate-500 text-sm capitalize">
+              {format(new Date(), 'EEEE, d. MMMM yyyy', { locale: de })}
+            </p>
+            <h1 className="text-3xl font-bold text-slate-100 mt-1">Habit Tracker</h1>
+          </div>
+
+          {/* Profil & Logout */}
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 bg-slate-800 rounded-2xl px-3 py-2 border border-slate-700">
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="Avatar"
+                  className="w-7 h-7 rounded-full"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+                  <User size={14} className="text-white" />
+                </div>
+              )}
+              <span className="text-sm text-slate-300 hidden sm:block max-w-[120px] truncate">
+                {user.user_metadata?.full_name ?? user.email}
+              </span>
+            </div>
+            <button
+              onClick={signOut}
+              className="p-2.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800 rounded-xl border border-slate-700 transition-colors"
+              title="Abmelden"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Fehler-Banner */}
@@ -83,7 +120,7 @@ export default function App() {
               <p className="font-medium text-sm">Verbindungsfehler</p>
               <p className="text-xs mt-0.5 text-red-500">{error}</p>
               <p className="text-xs mt-1 text-red-600">
-                SUPABASE_SETUP_NEU.sql + SUPABASE_MIGRATION.sql im SQL-Editor ausführen.
+                SUPABASE_AUTH_SETUP.sql im SQL-Editor ausführen.
               </p>
             </div>
           </div>
@@ -91,88 +128,96 @@ export default function App() {
 
         {/* Fortschritts-Karte (nur Heute) */}
         {view === 'today' && habits.length > 0 && (
-          <div className="mb-5 bg-slate-800 rounded-2xl p-4 border border-slate-700">
+          <div className="mb-6 bg-slate-800 rounded-2xl p-5 border border-slate-700">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-slate-300 font-medium">Heute</span>
-              <span className="font-bold text-slate-100">
+              <div>
+                <span className="text-slate-300 font-semibold text-lg">Heute</span>
+                {allDone && (
+                  <span className="ml-3 text-emerald-400 text-sm font-medium">Alle erledigt! 🎉</span>
+                )}
+              </div>
+              <span className="text-2xl font-bold text-slate-100">
                 {completedToday}
-                <span className="text-slate-500 font-normal">/{habits.length}</span>
+                <span className="text-slate-500 font-normal text-lg">/{habits.length}</span>
               </span>
             </div>
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-slate-700 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${progress * 100}%`,
                   backgroundColor: allDone ? '#10b981' : '#6366f1',
                 }}
               />
             </div>
-            {allDone && (
-              <p className="text-emerald-400 text-sm mt-2.5 font-medium">
-                Alle erledigt – super gemacht! 🎉
-              </p>
-            )}
           </div>
         )}
 
-        {/* Heute-Ansicht */}
+        {/* Heute – Card-Grid */}
         {view === 'today' && (
-          <div className="space-y-3">
+          <>
             {habits.length === 0 && !error ? (
-              <div className="flex flex-col items-center justify-center py-24 text-slate-500">
-                <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-4 border border-slate-700">
-                  <CheckCircle2 size={28} className="text-slate-600" />
+              <div className="flex flex-col items-center justify-center py-32 text-slate-500">
+                <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-5 border border-slate-700">
+                  <CheckCircle2 size={36} className="text-slate-600" />
                 </div>
-                <p className="font-medium text-slate-400">Noch keine Gewohnheiten</p>
+                <p className="font-semibold text-slate-400 text-lg">Noch keine Gewohnheiten</p>
                 <p className="text-sm mt-1">Tippe auf + um deine erste hinzuzufügen</p>
               </div>
             ) : (
-              habits.map((habit) => (
-                <HabitItem
-                  key={habit.id}
-                  habit={habit}
-                  completed={isCompletedForPeriod(habit)}
-                  streak={getStreak(habit.id)}
-                  onToggle={() => toggleCompletion(habit.id)}
-                  onEdit={() => setEditingHabit(habit)}
-                  onDelete={() => deleteHabit(habit.id)}
-                />
-              ))
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {habits.map((habit) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    completed={isCompletedForPeriod(habit)}
+                    streak={getStreak(habit.id)}
+                    onToggle={() => toggleCompletion(habit.id)}
+                    onEdit={() => setEditingHabit(habit)}
+                    onDelete={() => deleteHabit(habit.id)}
+                  />
+                ))}
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Wochen-Ansicht */}
         {view === 'week' && (
-          <WeekView
-            habits={habits}
-            isCompleted={isCompleted}
-            toggleCompletion={toggleCompletion}
-            today={today}
-          />
+          <div className="max-w-2xl mx-auto">
+            <WeekView
+              habits={habits}
+              isCompleted={isCompleted}
+              toggleCompletion={toggleCompletion}
+              today={today}
+            />
+          </div>
         )}
 
         {/* Monats-Ansicht */}
         {view === 'month' && (
-          <MonthView habits={habits} isCompleted={isCompleted} today={today} />
+          <div className="max-w-2xl mx-auto">
+            <MonthView habits={habits} isCompleted={isCompleted} today={today} />
+          </div>
         )}
 
         {/* Statistik-Ansicht */}
         {view === 'stats' && (
-          <StatsView
-            habits={habits}
-            completions={completions}
-            getStreak={getStreak}
-            getBestStreak={getBestStreak}
-            getCompletionRate={getCompletionRate}
-            getHeatmapData={getHeatmapData}
-            today={today}
-          />
+          <div className="max-w-2xl mx-auto">
+            <StatsView
+              habits={habits}
+              completions={completions}
+              getStreak={getStreak}
+              getBestStreak={getBestStreak}
+              getCompletionRate={getCompletionRate}
+              getHeatmapData={getHeatmapData}
+              today={today}
+            />
+          </div>
         )}
       </div>
 
-      {/* FAB (nur in Heute-Ansicht) */}
+      {/* FAB */}
       {view === 'today' && (
         <button
           onClick={() => setShowAdd(true)}
@@ -184,7 +229,7 @@ export default function App() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800">
-        <div className="max-w-lg mx-auto flex">
+        <div className="max-w-5xl mx-auto flex">
           {NAV.map(({ id, label, icon: Icon }) => (
             <button
               key={id}

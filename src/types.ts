@@ -1,5 +1,21 @@
 export type Frequency = 'daily' | 'weekly' | 'monthly';
 
+export const CATEGORIES = [
+  'Gesundheit',
+  'Sport & Fitness',
+  'Lernen & Bildung',
+  'Produktivität',
+  'Ernährung',
+  'Schlaf',
+  'Achtsamkeit',
+  'Soziales',
+  'Finanzen',
+  'Kreativität',
+  'Sonstiges',
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
+
 export interface Habit {
   id: string;
   name: string;
@@ -9,6 +25,7 @@ export interface Habit {
   frequency: Frequency;
   archived: boolean;
   created_at: string;
+  user_id?: string;
 }
 
 export interface HabitCompletion {
