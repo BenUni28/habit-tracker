@@ -1,4 +1,4 @@
-import { Check, Flame, Pencil, Trash2 } from 'lucide-react';
+import { Check, Flame, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { Habit } from '../types';
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+  isDragging?: boolean;
 }
 
 const FREQ_LABEL: Record<string, string> = {
@@ -16,13 +18,15 @@ const FREQ_LABEL: Record<string, string> = {
   monthly: 'Monatlich',
 };
 
-export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete }: Props) {
+export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete, dragHandleProps, isDragging }: Props) {
   const freq = habit.frequency ?? 'daily';
 
   return (
     <div
-      className={`group relative bg-slate-800 rounded-2xl overflow-hidden border transition-all duration-200 flex flex-col ${
-        completed
+      className={`group bg-slate-800 rounded-2xl overflow-hidden border flex flex-col transition-all duration-200 ${
+        isDragging
+          ? 'border-indigo-500 shadow-2xl shadow-indigo-900/50 scale-105 opacity-90'
+          : completed
           ? 'border-slate-600/50 opacity-75'
           : 'border-slate-700 hover:border-slate-500 hover:shadow-lg hover:shadow-slate-900/50'
       }`}
@@ -31,8 +35,18 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
       <div className="h-1.5 w-full flex-shrink-0" style={{ backgroundColor: habit.color }} />
 
       <div className="p-4 flex flex-col flex-1">
-        {/* Header: Name + Checkbox */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        {/* Header: Drag-Handle + Name + Checkbox */}
+        <div className="flex items-start gap-2 mb-3">
+          {/* Drag Handle */}
+          <div
+            {...dragHandleProps}
+            className="mt-1 p-0.5 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
+            title="Verschieben"
+          >
+            <GripVertical size={16} />
+          </div>
+
+          {/* Name */}
           <h3
             className={`font-bold text-base leading-snug flex-1 transition-colors ${
               completed ? 'line-through text-slate-500' : 'text-slate-100'
@@ -40,12 +54,12 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
           >
             {habit.name}
           </h3>
+
+          {/* Checkbox */}
           <button
             onClick={onToggle}
             className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90 mt-0.5 ${
-              completed
-                ? 'border-transparent shadow-md'
-                : 'border-slate-600 hover:border-slate-400'
+              completed ? 'border-transparent shadow-md' : 'border-slate-600 hover:border-slate-400'
             }`}
             style={completed ? { backgroundColor: habit.color } : {}}
           >

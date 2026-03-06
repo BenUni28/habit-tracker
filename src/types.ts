@@ -26,6 +26,7 @@ export interface Habit {
   archived: boolean;
   created_at: string;
   user_id?: string;
+  position: number;
 }
 
 export interface HabitCompletion {

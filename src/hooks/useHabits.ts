@@ -20,20 +20,16 @@ export function useHabits(userId: string | null) {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const fetchAll = useCallback(async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
+    if (!userId) { setLoading(false); return; }
     try {
       const oneYearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd');
       const [habitsRes, completionsRes] = await Promise.all([
-        supabase.from('habits').select('*').eq('archived', false).eq('user_id', userId).order('created_at'),
+        supabase.from('habits').select('*').eq('archived', false).eq('user_id', userId)
+          .order('position', { ascending: true }).order('created_at', { ascending: true }),
         supabase.from('habit_completions').select('*').gte('date', oneYearAgo),
       ]);
-
       if (habitsRes.error) throw habitsRes.error;
       if (completionsRes.error) throw completionsRes.error;
-
       setHabits(habitsRes.data ?? []);
       setCompletions(completionsRes.data ?? []);
     } catch (e) {
@@ -44,27 +40,22 @@ export function useHabits(userId: string | null) {
     }
   }, [userId]);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchAll();
-  }, [fetchAll]);
+  useEffect(() => { setLoading(true); fetchAll(); }, [fetchAll]);
 
   const isCompleted = (habitId: string, date: string = today): boolean =>
     completions.some((c) => c.habit_id === habitId && c.date === date);
 
   const isCompletedForPeriod = (habit: Habit): boolean => {
     const freq = habit.frequency ?? 'daily';
-    if (freq === 'daily') {
-      return isCompleted(habit.id, today);
-    } else if (freq === 'weekly') {
+    if (freq === 'daily') return isCompleted(habit.id, today);
+    if (freq === 'weekly') {
       const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
       const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
       return completions.some((c) => c.habit_id === habit.id && c.date >= weekStart && c.date <= weekEnd);
-    } else {
-      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
-      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
-      return completions.some((c) => c.habit_id === habit.id && c.date >= monthStart && c.date <= monthEnd);
     }
+    const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+    const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+    return completions.some((c) => c.habit_id === habit.id && c.date >= monthStart && c.date <= monthEnd);
   };
 
   const toggleCompletion = async (habitId: string, date: string = today) => {
@@ -76,26 +67,16 @@ export function useHabits(userId: string | null) {
     } else {
       const temp: HabitCompletion = { id: -Date.now(), habit_id: habitId, date };
       setCompletions((prev) => [...prev, temp]);
-      const { data, error } = await supabase
-        .from('habit_completions')
-        .insert({ habit_id: habitId, date })
-        .select()
-        .single();
-      if (error) {
-        setCompletions((prev) => prev.filter((c) => c.id !== temp.id));
-      } else if (data) {
-        setCompletions((prev) => prev.map((c) => (c.id === temp.id ? data : c)));
-      }
+      const { data, error } = await supabase.from('habit_completions').insert({ habit_id: habitId, date }).select().single();
+      if (error) setCompletions((prev) => prev.filter((c) => c.id !== temp.id));
+      else if (data) setCompletions((prev) => prev.map((c) => (c.id === temp.id ? data : c)));
     }
   };
 
   const addHabit = async (input: HabitInput) => {
     if (!userId) return;
-    const { data, error } = await supabase
-      .from('habits')
-      .insert({ ...input, user_id: userId })
-      .select()
-      .single();
+    const position = habits.length;
+    const { data, error } = await supabase.from('habits').insert({ ...input, user_id: userId, position }).select().single();
     if (!error && data) setHabits((prev) => [...prev, data]);
   };
 
@@ -108,6 +89,16 @@ export function useHabits(userId: string | null) {
     setHabits((prev) => prev.filter((h) => h.id !== id));
     setCompletions((prev) => prev.filter((c) => c.habit_id !== id));
     await supabase.from('habits').delete().eq('id', id);
+  };
+
+  // Reihenfolge neu setzen (Drag & Drop)
+  const reorderHabits = async (newOrder: Habit[]) => {
+    setHabits(newOrder);
+    await Promise.all(
+      newOrder.map((habit, index) =>
+        supabase.from('habits').update({ position: index }).eq('id', habit.id)
+      )
+    );
   };
 
   const getStreak = (habitId: string): number => {
@@ -127,9 +118,7 @@ export function useHabits(userId: string | null) {
     if (sorted.length === 0) return 0;
     let best = 1, current = 1;
     for (let i = 1; i < sorted.length; i++) {
-      const diff = Math.round(
-        (new Date(sorted[i] + 'T12:00:00').getTime() - new Date(sorted[i - 1] + 'T12:00:00').getTime()) / 86400000,
-      );
+      const diff = Math.round((new Date(sorted[i] + 'T12:00:00').getTime() - new Date(sorted[i - 1] + 'T12:00:00').getTime()) / 86400000);
       if (diff === 1) { current++; if (current > best) best = current; }
       else if (diff > 1) current = 1;
     }
@@ -151,7 +140,7 @@ export function useHabits(userId: string | null) {
   return {
     habits, completions, loading, error, today,
     isCompleted, isCompletedForPeriod, toggleCompletion,
-    addHabit, editHabit, deleteHabit,
+    addHabit, editHabit, deleteHabit, reorderHabits,
     getStreak, getBestStreak, getCompletionRate, getHeatmapData,
   };
 }
