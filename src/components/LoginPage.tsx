@@ -17,36 +17,36 @@ interface Props {
 
 export function LoginPage({ onSignIn }: Props) {
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
       {/* Hintergrund-Deko */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-violet-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-violet-500/10 dark:bg-violet-600/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-sm">
-        <div className="bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
+        <div className="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-2xl text-center">
           {/* Icon */}
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-900/50">
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/30">
             <CheckCircle2 size={36} className="text-white" />
           </div>
 
           {/* Titel */}
-          <h1 className="text-3xl font-bold text-slate-100 mb-2">Habit Tracker</h1>
-          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Habit Tracker</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">
             Verfolge deine Gewohnheiten,<br />erkenne deine Streaks.
           </p>
 
           {/* Google-Button */}
           <button
             onClick={onSignIn}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-800 font-semibold py-3.5 px-5 rounded-2xl transition-all active:scale-95 shadow-lg"
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-800 font-semibold py-3.5 px-5 rounded-2xl transition-all active:scale-95 shadow-lg border border-slate-200"
           >
             <GoogleIcon />
             Mit Google anmelden
           </button>
 
-          <p className="text-xs text-slate-600 mt-5">
+          <p className="text-xs text-slate-400 dark:text-slate-600 mt-5">
             Deine Daten werden sicher in Supabase gespeichert
           </p>
         </div>

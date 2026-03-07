@@ -27,7 +27,7 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
 
   if (habits.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+      <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
         <p>Noch keine Gewohnheiten vorhanden</p>
       </div>
     );
@@ -36,17 +36,17 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
   return (
     <div>
       {/* Navigation */}
-      <div className="flex items-center justify-between mb-5 bg-slate-800 rounded-2xl p-3 border border-slate-700">
+      <div className="flex items-center justify-between mb-5 bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setWeekOffset((w) => w - 1)}
-          className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-xl transition-colors"
+          className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <div className="text-center">
-          <p className="text-slate-100 font-medium">{weekLabel}</p>
+          <p className="text-slate-900 dark:text-slate-100 font-medium">{weekLabel}</p>
           {weekOffset !== 0 && (
-            <button onClick={() => setWeekOffset(0)} className="text-xs text-indigo-400 mt-0.5">
+            <button onClick={() => setWeekOffset(0)} className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">
               Heute
             </button>
           )}
@@ -54,7 +54,7 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
         <button
           onClick={() => setWeekOffset((w) => w + 1)}
           disabled={weekOffset >= 0}
-          className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronRight size={20} />
         </button>
@@ -69,10 +69,10 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
             const isToday = weekDayStrings[i] === today;
             return (
               <div key={i} className="w-9 text-center">
-                <div className={`text-xs font-medium ${isToday ? 'text-indigo-400' : 'text-slate-500'}`}>
+                <div className={`text-xs font-medium ${isToday ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-500'}`}>
                   {DAY_NAMES[i]}
                 </div>
-                <div className={`text-xs mt-0.5 ${isToday ? 'text-indigo-400 font-bold' : 'text-slate-600'}`}>
+                <div className={`text-xs mt-0.5 ${isToday ? 'text-indigo-500 dark:text-indigo-400 font-bold' : 'text-slate-400 dark:text-slate-600'}`}>
                   {format(day, 'd')}
                 </div>
               </div>
@@ -84,13 +84,13 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
         {habits.map((habit) => {
           const doneCount = weekDayStrings.filter((d) => isCompleted(habit.id, d)).length;
           return (
-            <div key={habit.id} className="bg-slate-800 rounded-2xl p-3 border border-slate-700">
+            <div key={habit.id} className="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: habit.color }} />
-                <span className="text-slate-100 font-medium flex-1 text-sm truncate">{habit.name}</span>
+                <span className="text-slate-900 dark:text-slate-100 font-medium flex-1 text-sm truncate">{habit.name}</span>
                 <span className="text-xs text-slate-500 font-medium">
                   {doneCount}
-                  <span className="text-slate-700">/7</span>
+                  <span className="text-slate-300 dark:text-slate-700">/7</span>
                 </span>
               </div>
               <div className="flex gap-1">
@@ -108,10 +108,10 @@ export function WeekView({ habits, isCompleted, toggleCompletion, today }: Props
                         done
                           ? 'border-transparent'
                           : isToday
-                          ? 'border-slate-500 border-dashed'
+                          ? 'border-slate-400 dark:border-slate-500 border-dashed'
                           : isFuture
-                          ? 'border-slate-800 cursor-not-allowed'
-                          : 'border-slate-700 hover:border-slate-500 cursor-pointer'
+                          ? 'border-slate-100 dark:border-slate-800 cursor-not-allowed'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 cursor-pointer'
                       }`}
                       style={done ? { backgroundColor: habit.color } : {}}
                     >

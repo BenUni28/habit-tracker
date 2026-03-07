@@ -23,12 +23,12 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
 
   return (
     <div
-      className={`group bg-slate-800 rounded-2xl overflow-hidden border flex flex-col transition-all duration-200 ${
+      className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border flex flex-col transition-all duration-200 ${
         isDragging
           ? 'border-indigo-500 shadow-2xl shadow-indigo-900/50 scale-105 opacity-90'
           : completed
-          ? 'border-slate-600/50 opacity-75'
-          : 'border-slate-700 hover:border-slate-500 hover:shadow-lg hover:shadow-slate-900/50'
+          ? 'border-slate-200/50 dark:border-slate-600/50 opacity-75'
+          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50'
       }`}
     >
       {/* Farbbalken oben */}
@@ -40,7 +40,7 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
           {/* Drag Handle */}
           <div
             {...dragHandleProps}
-            className="mt-1 p-0.5 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
+            className="mt-1 p-0.5 text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
             title="Verschieben"
           >
             <GripVertical size={16} />
@@ -49,7 +49,7 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
           {/* Name */}
           <h3
             className={`font-bold text-base leading-snug flex-1 transition-colors ${
-              completed ? 'line-through text-slate-500' : 'text-slate-100'
+              completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-slate-100'
             }`}
           >
             {habit.name}
@@ -59,7 +59,7 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
           <button
             onClick={onToggle}
             className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90 mt-0.5 ${
-              completed ? 'border-transparent shadow-md' : 'border-slate-600 hover:border-slate-400'
+              completed ? 'border-transparent shadow-md' : 'border-slate-300 dark:border-slate-600 hover:border-slate-500 dark:hover:border-slate-400'
             }`}
             style={completed ? { backgroundColor: habit.color } : {}}
           >
@@ -77,14 +77,14 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
               {habit.category}
             </span>
           )}
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-700/80 text-slate-400 font-medium">
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/80 text-slate-500 dark:text-slate-400 font-medium">
             {FREQ_LABEL[freq]}
           </span>
         </div>
 
         {/* Beschreibung */}
         {habit.description && (
-          <p className="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-3 flex-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3 flex-1">
             {habit.description}
           </p>
         )}
@@ -98,17 +98,17 @@ export function HabitCard({ habit, completed, streak, onToggle, onEdit, onDelete
         )}
 
         {/* Aktionen */}
-        <div className="flex items-center gap-1 mt-auto pt-3 border-t border-slate-700/60">
+        <div className="flex items-center gap-1 mt-auto pt-3 border-t border-slate-100 dark:border-slate-700/60">
           <button
             onClick={onEdit}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-slate-500 hover:text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
           >
             <Pencil size={12} />
             Bearbeiten
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-colors"
           >
             <Trash2 size={14} />
           </button>

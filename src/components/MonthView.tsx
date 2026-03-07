@@ -36,19 +36,19 @@ export function MonthView({ habits, isCompleted, today }: Props) {
   return (
     <div>
       {/* Navigation */}
-      <div className="flex items-center justify-between mb-5 bg-slate-800 rounded-2xl p-3 border border-slate-700">
+      <div className="flex items-center justify-between mb-5 bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setCurrentDate((d) => subMonths(d, 1))}
-          className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-xl transition-colors"
+          className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <div className="text-center">
-          <p className="text-slate-100 font-medium capitalize">
+          <p className="text-slate-900 dark:text-slate-100 font-medium capitalize">
             {format(currentDate, 'MMMM yyyy', { locale: de })}
           </p>
           {!isCurrentMonth && (
-            <button onClick={() => setCurrentDate(new Date())} className="text-xs text-indigo-400 mt-0.5">
+            <button onClick={() => setCurrentDate(new Date())} className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">
               Heute
             </button>
           )}
@@ -56,16 +56,16 @@ export function MonthView({ habits, isCompleted, today }: Props) {
         <button
           onClick={() => setCurrentDate((d) => addMonths(d, 1))}
           disabled={isCurrentMonth}
-          className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronRight size={20} />
         </button>
       </div>
 
       {/* Kalender */}
-      <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         {/* Wochentage-Header */}
-        <div className="grid grid-cols-7 border-b border-slate-700">
+        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700">
           {WEEKDAYS.map((d) => (
             <div key={d} className="py-2.5 text-center text-xs font-medium text-slate-500">
               {d}
@@ -85,7 +85,7 @@ export function MonthView({ habits, isCompleted, today }: Props) {
             return (
               <div
                 key={i}
-                className={`min-h-[56px] p-1.5 border-b border-r border-slate-700/40 ${
+                className={`min-h-[56px] p-1.5 border-b border-r border-slate-200/60 dark:border-slate-700/40 ${
                   i % 7 === 6 ? 'border-r-0' : ''
                 } ${!inMonth ? 'opacity-25' : ''}`}
               >
@@ -95,8 +95,8 @@ export function MonthView({ habits, isCompleted, today }: Props) {
                     isToday
                       ? 'bg-indigo-500 text-white font-bold'
                       : isFuture
-                      ? 'text-slate-600'
-                      : 'text-slate-400'
+                      ? 'text-slate-400 dark:text-slate-600'
+                      : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {format(day, 'd')}
@@ -113,7 +113,7 @@ export function MonthView({ habits, isCompleted, today }: Props) {
                     />
                   ))}
                   {completedHabits.length > 8 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-600" title="Weitere…" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" title="Weitere…" />
                   )}
                 </div>
               </div>
@@ -128,7 +128,7 @@ export function MonthView({ habits, isCompleted, today }: Props) {
           {habits.map((h) => (
             <div key={h.id} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: h.color }} />
-              <span className="text-xs text-slate-400 truncate max-w-[80px]">{h.name}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[80px]">{h.name}</span>
             </div>
           ))}
         </div>
