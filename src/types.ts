@@ -35,4 +35,13 @@ export interface HabitCompletion {
   date: string;
 }
 
-export type View = 'today' | 'week' | 'month' | 'stats';
+export interface Todo {
+  id: string;
+  user_id: string;
+  date: string;
+  text: string;
+  done: boolean;
+  created_at: string;
+}
+
+export type View = 'today' | 'week' | 'month' | 'stats' | 'todos';

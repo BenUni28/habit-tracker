@@ -45,9 +45,9 @@ export function useHabits(userId: string | null) {
   const isCompleted = (habitId: string, date: string = today): boolean =>
     completions.some((c) => c.habit_id === habitId && c.date === date);
 
-  const isCompletedForPeriod = (habit: Habit): boolean => {
+  const isCompletedForPeriod = (habit: Habit, forDate: string = today): boolean => {
     const freq = habit.frequency ?? 'daily';
-    if (freq === 'daily') return isCompleted(habit.id, today);
+    if (freq === 'daily') return isCompleted(habit.id, forDate);
     if (freq === 'weekly') {
       const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
       const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');

@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { useState, useEffect, useRef } from 'react';
+import { format, subDays, addDays, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { CheckCircle2, CalendarDays, Calendar, BarChart2, Plus, AlertCircle, LogOut, User, Sun, Moon } from 'lucide-react';
+import {
+  CheckCircle2, CalendarDays, Calendar, BarChart2, Plus, AlertCircle,
+  LogOut, User, Sun, Moon, ChevronLeft, ChevronRight, ClipboardList,
+} from 'lucide-react';
 import {
   DndContext, closestCenter, DragEndEvent, DragOverlay,
   PointerSensor, TouchSensor, useSensor, useSensors,
@@ -10,6 +13,7 @@ import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@d
 import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from './hooks/useAuth';
 import { useHabits } from './hooks/useHabits';
+import { useTodos } from './hooks/useTodos';
 import { Habit, View } from './types';
 import { LoginPage } from './components/LoginPage';
 import { HabitCard } from './components/HabitCard';
@@ -17,6 +21,7 @@ import { HabitModal, HabitFormData } from './components/HabitModal';
 import { WeekView } from './components/WeekView';
 import { MonthView } from './components/MonthView';
 import { StatsView } from './components/StatsView';
+import { TodoView } from './components/TodoView';
 
 function SortableHabitCard(props: {
   habit: Habit; completed: boolean; streak: number;
@@ -35,6 +40,7 @@ const NAV: { id: View; label: string; icon: React.ElementType }[] = [
   { id: 'week', label: 'Woche', icon: CalendarDays },
   { id: 'month', label: 'Monat', icon: Calendar },
   { id: 'stats', label: 'Statistik', icon: BarChart2 },
+  { id: 'todos', label: 'To-Dos', icon: ClipboardList },
 ];
 
 export default function App() {
@@ -43,6 +49,9 @@ export default function App() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [activeHabit, setActiveHabit] = useState<Habit | null>(null);
+  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
+  const [showOpenTodosAlert, setShowOpenTodosAlert] = useState(false);
+  const alertShownRef = useRef(false);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     if (saved !== null) return saved === 'true';
@@ -65,6 +74,21 @@ export default function App() {
     getStreak, getBestStreak, getCompletionRate, getHeatmapData,
   } = useHabits(user?.id ?? null);
 
+  const { todos, loading: todosLoading, addTodo, toggleTodo, deleteTodo, openTodosFromPast } = useTodos(user?.id ?? null);
+
+  // Show popup once if there are open todos from past days
+  useEffect(() => {
+    if (!todosLoading && openTodosFromPast.length > 0 && !alertShownRef.current) {
+      setShowOpenTodosAlert(true);
+      alertShownRef.current = true;
+    }
+  }, [todosLoading, openTodosFromPast.length]);
+
+  // Reset selected date to today when switching to the today view
+  useEffect(() => {
+    if (view === 'today') setSelectedDate(today);
+  }, [view, today]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
@@ -85,9 +109,20 @@ export default function App() {
     setEditingHabit(null);
   };
 
-  const completedToday = habits.filter((h) => isCompletedForPeriod(h)).length;
-  const progress = habits.length > 0 ? completedToday / habits.length : 0;
-  const allDone = habits.length > 0 && completedToday === habits.length;
+  const isSelectedToday = selectedDate === today;
+
+  const goToPrevDay = () => setSelectedDate((d) => format(subDays(parseISO(d), 1), 'yyyy-MM-dd'));
+  const goToNextDay = () => {
+    if (selectedDate < today) setSelectedDate((d) => format(addDays(parseISO(d), 1), 'yyyy-MM-dd'));
+  };
+
+  const completedForDate = habits.filter((h) => isCompletedForPeriod(h, selectedDate)).length;
+  const progress = habits.length > 0 ? completedForDate / habits.length : 0;
+  const allDone = habits.length > 0 && completedForDate === habits.length;
+
+  const selectedDateLabel = isSelectedToday
+    ? 'Heute'
+    : format(parseISO(selectedDate), 'EEEE, d. MMMM', { locale: de });
 
   if (authLoading) return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
@@ -154,11 +189,32 @@ export default function App() {
         {view === 'today' && habits.length > 0 && (
           <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
             <div className="flex justify-between items-center mb-3">
-              <div>
-                <span className="text-slate-700 dark:text-slate-300 font-semibold text-lg">Heute</span>
-                {allDone && <span className="ml-3 text-emerald-600 dark:text-emerald-400 text-sm font-medium">Alle erledigt! 🎉</span>}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToPrevDay}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400"
+                  title="Vorheriger Tag"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <div>
+                  <span className="text-slate-700 dark:text-slate-300 font-semibold text-lg capitalize">{selectedDateLabel}</span>
+                  {allDone && isSelectedToday && <span className="ml-3 text-emerald-600 dark:text-emerald-400 text-sm font-medium">Alle erledigt! 🎉</span>}
+                </div>
+                <button
+                  onClick={goToNextDay}
+                  disabled={isSelectedToday}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    isSelectedToday
+                      ? 'opacity-30 cursor-not-allowed text-slate-400'
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400'
+                  }`}
+                  title="Nächster Tag"
+                >
+                  <ChevronRight size={18} />
+                </button>
               </div>
-              <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{completedToday}<span className="text-slate-400 font-normal text-lg">/{habits.length}</span></span>
+              <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{completedForDate}<span className="text-slate-400 font-normal text-lg">/{habits.length}</span></span>
             </div>
             <div className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-700" style={{ width: `${progress * 100}%`, backgroundColor: allDone ? '#10b981' : '#6366f1' }} />
@@ -188,8 +244,8 @@ export default function App() {
                   {habits.map((habit) => (
                     <SortableHabitCard
                       key={habit.id} habit={habit}
-                      completed={isCompletedForPeriod(habit)} streak={getStreak(habit.id)}
-                      onToggle={() => toggleCompletion(habit.id)}
+                      completed={isCompletedForPeriod(habit, selectedDate)} streak={getStreak(habit.id)}
+                      onToggle={() => toggleCompletion(habit.id, selectedDate)}
                       onEdit={() => setEditingHabit(habit)}
                       onDelete={() => deleteHabit(habit.id)}
                     />
@@ -198,7 +254,7 @@ export default function App() {
               </SortableContext>
               <DragOverlay>
                 {activeHabit && (
-                  <HabitCard habit={activeHabit} completed={isCompletedForPeriod(activeHabit)} streak={getStreak(activeHabit.id)} onToggle={() => {}} onEdit={() => {}} onDelete={() => {}} isDragging />
+                  <HabitCard habit={activeHabit} completed={isCompletedForPeriod(activeHabit, selectedDate)} streak={getStreak(activeHabit.id)} onToggle={() => {}} onEdit={() => {}} onDelete={() => {}} isDragging />
                 )}
               </DragOverlay>
             </DndContext>
@@ -208,9 +264,22 @@ export default function App() {
         {view === 'week' && <div className="max-w-2xl mx-auto"><WeekView habits={habits} isCompleted={isCompleted} toggleCompletion={toggleCompletion} today={today} /></div>}
         {view === 'month' && <div className="max-w-2xl mx-auto"><MonthView habits={habits} isCompleted={isCompleted} today={today} /></div>}
         {view === 'stats' && <div className="max-w-2xl mx-auto"><StatsView habits={habits} completions={completions} getStreak={getStreak} getBestStreak={getBestStreak} getCompletionRate={getCompletionRate} getHeatmapData={getHeatmapData} today={today} isDark={isDark} /></div>}
+        {view === 'todos' && (
+          <div className="max-w-2xl mx-auto">
+            <TodoView
+              todos={todos}
+              today={today}
+              loading={todosLoading}
+              onAdd={addTodo}
+              onToggle={toggleTodo}
+              onDelete={deleteTodo}
+              openTodosFromPast={openTodosFromPast}
+            />
+          </div>
+        )}
       </div>
 
-      {view === 'today' && (
+      {view === 'today' && isSelectedToday && (
         <button onClick={() => setShowAdd(true)} className="fixed bottom-24 right-5 w-14 h-14 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center shadow-xl shadow-indigo-900/40 transition-all active:scale-90">
           <Plus size={26} className="text-white" />
         </button>
@@ -229,6 +298,39 @@ export default function App() {
 
       {(showAdd || editingHabit !== null) && (
         <HabitModal habit={editingHabit ?? undefined} onSave={handleSave} onClose={() => { setShowAdd(false); setEditingHabit(null); }} />
+      )}
+
+      {/* Open todos popup */}
+      {showOpenTodosAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                <AlertCircle size={20} className="text-amber-500" />
+              </div>
+              <h2 className="font-semibold text-slate-900 dark:text-slate-100">Offene To-Dos</h2>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-5">
+              Du hast noch{' '}
+              <span className="font-semibold text-amber-500">{openTodosFromPast.length}</span>{' '}
+              offene{openTodosFromPast.length === 1 ? 's' : ''} To-Do{openTodosFromPast.length === 1 ? '' : 's'} von vorherigen Tagen.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowOpenTodosAlert(false); setView('todos'); }}
+                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                Zu den To-Dos
+              </button>
+              <button
+                onClick={() => setShowOpenTodosAlert(false)}
+                className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-colors"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
